@@ -1,36 +1,8 @@
 import time
-import os
-import json
 import streamlit as st
 import pandas as pd
 from comparator import compare, CompareResult
 from reporter import generate_excel_bytes
-
-_KEY_FILE = os.path.join(os.path.dirname(__file__), ".api_key.json")
-
-def _load_api_key():
-    """从本地文件加载 API Key 到 session_state 和 config"""
-    if "api_key" not in st.session_state:
-        if os.path.exists(_KEY_FILE):
-            try:
-                data = json.load(open(_KEY_FILE))
-                key = data.get("api_key", "")
-                if key:
-                    import config as _cfg
-                    _cfg.QWEN_API_KEY = key
-                    st.session_state["api_key"] = key
-            except Exception:
-                pass
-
-def _save_api_key(key: str):
-    """持久化 API Key 到本地文件"""
-    try:
-        with open(_KEY_FILE, "w") as f:
-            json.dump({"api_key": key}, f)
-    except Exception:
-        pass
-
-_load_api_key()
 
 st.set_page_config(page_title="电商链接图片相似度比对", layout="wide", page_icon="🔍")
 
@@ -204,14 +176,13 @@ def settings_dialog():
                             placeholder="sk-xxxxxxxxxxxxxxxx",
                             value=st.session_state.get("api_key", ""))
     if st.button("保存配置", type="primary", use_container_width=True):
-            if api_key:
-                import config as _cfg
-                _cfg.QWEN_API_KEY = api_key
-                st.session_state["api_key"] = api_key
-                _save_api_key(api_key)
-                st.success("API Key 已保存")
-            else:
-                st.warning("API Key 不能为空")
+        if api_key:
+            import config as _cfg
+            _cfg.QWEN_API_KEY = api_key
+            st.session_state["api_key"] = api_key
+            st.success("API Key 已保存（当前会话有效）")
+        else:
+            st.warning("API Key 不能为空")
 
 
 # ── 顶栏 ─────────────────────────────────────────────
