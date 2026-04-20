@@ -23,12 +23,9 @@ _SYSTEM_PROMPT = """你是一个电商视觉比对系统的图像分析模块。
 
 你只有一个功能：判断两张商品图片的**视觉画面**是否相同。
 
-严禁事项（违反即判定结果无效）：
-- /*严禁读取或比较图片中的任何文字*/
-- 严禁读取或比较任何价格、数字、金额
-- /*严禁读取或比较标签、角标、贴纸上的文字*/
-- 严禁因价格不同而判定图片不同
-- /*严禁因文字不同而判定图片不同
+严禁事项：
+- 严禁因价格、金额、数字不同而判定图片不同
+- 严禁因文字、标签、角标不同而判定图片不同
 
 判断依据（仅限以下内容）：
 - 商品的外形、轮廓、款式
@@ -47,9 +44,6 @@ _PROMPT = """请判断上方两张图片的视觉画面是否相同。
 
 请只返回如下JSON，不要输出其他任何内容：
 {"is_same": true或false, "similarity_score": 0到100的整数, "reason": "一句话描述画面视觉差异（禁止提及价格文字）"}"""
-
-# 检测reason中是否含有价格/文字相关词，用于判断模型是否违规
-_PRICE_KEYWORDS = ["价格", "价", "元", "¥", "￥", "₩", "文字", "数字", "标签", "角标", "促销", "折", "off", "price"]
 
 
 def _url_to_base64(url: str) -> str:
@@ -115,14 +109,6 @@ def call_qwen_vl(url1: str, url2: str, api_key: str = "") -> VLResult:
         is_same = bool(data["is_same"])
         reason = str(data["reason"])
         score = int(data["similarity_score"])
-
-        # 安全校验：若reason中含有价格/文字相关词，说明模型违规依赖文字判断
-        # 此时重置判断结果为相同（因为视觉画面本身可能一致）
-        reason_lower = reason.lower()
-        if not is_same and any(kw in reason_lower for kw in _PRICE_KEYWORDS):
-            is_same = True
-            score = max(score, 90)
-            reason = f"[已修正] 原判断依赖文字/价格信息（已忽略），视觉画面无实质差异"
 
         return VLResult(
             is_same=is_same,
