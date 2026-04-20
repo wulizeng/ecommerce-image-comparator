@@ -1,0 +1,6 @@
+image_comparator/.api_key.json
+**/__pycache__/
+*.pyc
+.DS_Store
+.env
+.superpowers/
