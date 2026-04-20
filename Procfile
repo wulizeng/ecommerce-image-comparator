@@ -1,1 +1,0 @@
-web: streamlit run image_comparator/app.py --server.port=$PORT --server.address=0.0.0.0
