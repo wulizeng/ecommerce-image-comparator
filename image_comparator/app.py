@@ -233,6 +233,9 @@ with tab1:
     st.markdown('</div>', unsafe_allow_html=True)
 
     if run:
+        if not st.session_state.get("api_key", ""):
+            st.warning("请先点击右上角「设置」按钮，填写 API Key 后再进行比对。")
+            st.stop()
         with st.spinner("正在分析，请稍候..."):
             _t0 = time.time()
             result = compare(url1.strip(), url2.strip(), api_key=st.session_state.get("api_key", ""))
@@ -384,6 +387,9 @@ with tab2:
                 start_clicked = st.button("开始批量比对", type="primary", use_container_width=True)
 
             if start_clicked:
+                    if not st.session_state.get("api_key", ""):
+                        st.warning("请先点击右上角「设置」按钮，填写 API Key 后再进行批量比对。")
+                        st.stop()
                     item_ids = df["宝贝ID"].astype(str).str.strip() if "宝贝ID" in df.columns else [""] * len(df)
                     pairs = list(zip(
                         item_ids,
