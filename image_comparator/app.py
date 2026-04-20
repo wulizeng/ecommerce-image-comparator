@@ -235,7 +235,7 @@ with tab1:
     if run:
         with st.spinner("正在分析，请稍候..."):
             _t0 = time.time()
-            result = compare(url1.strip(), url2.strip())
+            result = compare(url1.strip(), url2.strip(), api_key=st.session_state.get("api_key", ""))
             _elapsed = time.time() - _t0
 
         if result.method == "error":
@@ -401,6 +401,7 @@ with tab2:
                     status_text = st.empty()
                     status_text.markdown(f'<div style="text-align:center;font-size:13px;color:#6366f1;margin-top:4px;">⏳ 0 / {total} · 已用时 0.0s</div>', unsafe_allow_html=True)
                     start_time = time.time()
+                    _api_key = st.session_state.get("api_key", "")
 
                     from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError as FuturesTimeoutError
                     from config import BATCH_CONCURRENCY, COMPARE_TIMEOUT
@@ -409,7 +410,7 @@ with tab2:
                     done = 0
 
                     with ThreadPoolExecutor(max_workers=BATCH_CONCURRENCY) as executor:
-                        fmap = {executor.submit(compare, u1, u2): i
+                        fmap = {executor.submit(compare, u1, u2, _api_key): i
                                 for i, (iid, u1, u2) in enumerate(pairs)}
                         for future in as_completed(fmap):
                             idx = fmap[future]

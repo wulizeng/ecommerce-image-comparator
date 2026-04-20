@@ -65,18 +65,19 @@ def _url_to_base64(url: str) -> str:
     return f"data:{content_type};base64,{b64}"
 
 
-def call_qwen_vl(url1: str, url2: str) -> VLResult:
+def call_qwen_vl(url1: str, url2: str, api_key: str = "") -> VLResult:
     """
     调用千问 VL 模型判断两张图片是否相同（OpenAI 兼容接口）。
     失败时抛出 VLError。
+    api_key 优先使用调用方传入的值，其次回退到 config/env。
     """
     import config as _config
-    api_key = _config.QWEN_API_KEY or QWEN_API_KEY
-    if not api_key:
+    resolved_key = api_key or _config.QWEN_API_KEY or QWEN_API_KEY
+    if not resolved_key:
         raise VLError("未配置 API Key，请在设置中填写")
 
     try:
-        client = OpenAI(api_key=api_key, base_url=_config.QWEN_API_BASE)
+        client = OpenAI(api_key=resolved_key, base_url=_config.QWEN_API_BASE)
 
         # 转 base64 避免网关无法访问外部图片 URL
         img1_b64 = _url_to_base64(url1)

@@ -23,7 +23,7 @@ def _make_recommendation(is_same: bool) -> str:
     return "图片一致，无需调整" if is_same else "图片不一致，建议调整店铺链接主图"
 
 
-def compare(url1: str, url2: str) -> CompareResult:
+def compare(url1: str, url2: str, api_key: str = "") -> CompareResult:
     """
     比对两张图片URL，返回 CompareResult。
     流程：下载 → pHash初筛 → 按需调用千问VL。
@@ -79,7 +79,7 @@ def compare(url1: str, url2: str) -> CompareResult:
 
     # 3. 模糊区间 → 调用千问VL
     try:
-        vl_result = call_qwen_vl(url1, url2)
+        vl_result = call_qwen_vl(url1, url2, api_key=api_key)
         steps.append({"step": 2, "name": "千问 VL 大模型精判", "status": "done", "detail": vl_result.reason})
         return CompareResult(
             url1=url1, url2=url2,
