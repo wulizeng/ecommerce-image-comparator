@@ -8,7 +8,7 @@ QWEN_API_BASE: str = "https://ai-aigw.semir.com/bailian-tongyi-outside/v1"
 
 # pHash 汉明距离阈值
 PHASH_SAME_THRESHOLD: int = 2    # 距离 <= 2 → 直接判同（几乎完全一致）
-PHASH_DIFF_THRESHOLD: int = 25   # 距离 >= 25 → 直接判异（明显不同内容）
+PHASH_DIFF_THRESHOLD: int = 30   # 距离 >= 30 → 直接判异（明显不同内容）
 
 # 批量模式并发数
 BATCH_CONCURRENCY: int = 10
