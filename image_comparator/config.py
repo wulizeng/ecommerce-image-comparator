@@ -1,18 +1,7 @@
 import os
-import json
 
-# 千问 API Key：优先读本地持久化文件，其次环境变量
-_KEY_FILE = os.path.join(os.path.dirname(__file__), ".api_key.json")
-
-def _read_saved_key() -> str:
-    try:
-        if os.path.exists(_KEY_FILE):
-            return json.load(open(_KEY_FILE)).get("api_key", "")
-    except Exception:
-        pass
-    return ""
-
-QWEN_API_KEY: str = _read_saved_key() or os.getenv("QWEN_API_KEY", "")
+# 千问 API Key：优先读环境变量（供本地 .env 或 CI 注入），云端由用户在 Session 中输入
+QWEN_API_KEY: str = os.getenv("QWEN_API_KEY", "")
 
 # API 接入点（公司网关）
 QWEN_API_BASE: str = "https://ai-aigw.semir.com/bailian-tongyi-outside/v1"
