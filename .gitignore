@@ -1,6 +1,15 @@
+# API keys and secrets
 image_comparator/.api_key.json
+.env
+
+# macOS
+**/.DS_Store
+
+# Python
 **/__pycache__/
 *.pyc
-.DS_Store
-.env
+**/.pytest_cache/
+
+# Tooling artifacts
 .superpowers/
+.claude/

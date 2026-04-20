@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(python -m pytest tests/test_reporter.py -v --tb=short)",
-      "Bash(python3)"
-    ]
-  }
-}
