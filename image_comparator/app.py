@@ -1,4 +1,5 @@
 import time
+import json
 import streamlit as st
 import pandas as pd
 from comparator import compare, CompareResult
@@ -168,6 +169,41 @@ footer, #MainMenu, header { visibility: hidden; }
 """, unsafe_allow_html=True)
 
 
+# ── 从浏览器 localStorage 恢复 API Key ─────────────────
+# 注入 JS：读取 localStorage 中的 key，通过 URL hash 触发后端重读
+if "api_key" not in st.session_state:
+    st.components.v1.html("""
+<script>
+(function(){
+    var key = localStorage.getItem('qwen_api_key');
+    if (key && window.location.hash.indexOf('_k=') === -1) {
+        window.location.hash = '_k=' + encodeURIComponent(key);
+    }
+})();
+</script>
+""", height=0)
+
+    import urllib.parse
+    _frag = st.query_params.get_all("_k")
+    if _frag:
+        try:
+            _restored_key = urllib.parse.unquote(_frag[-1])
+        except Exception:
+            _restored_key = ""
+        if _restored_key:
+            st.session_state["api_key"] = _restored_key
+            import config as _cfg
+            _cfg.QWEN_API_KEY = _restored_key
+            st.rerun()
+
+def _save_key_to_browser(key: str):
+    """将 API Key 存入浏览器 localStorage"""
+    st.components.v1.html(
+        f"""<script>
+        localStorage.setItem('qwen_api_key', {json.dumps(key)});
+        </script>""", height=0
+    )
+
 # ── 设置弹窗 ─────────────────────────────────────────
 @st.dialog("API 配置")
 def settings_dialog():
@@ -180,7 +216,8 @@ def settings_dialog():
             import config as _cfg
             _cfg.QWEN_API_KEY = api_key
             st.session_state["api_key"] = api_key
-            st.success("API Key 已保存（当前会话有效）")
+            _save_key_to_browser(api_key)
+            st.success("API Key 已保存，刷新页面仍有效")
         else:
             st.warning("API Key 不能为空")
 
