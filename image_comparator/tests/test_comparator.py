@@ -1,7 +1,7 @@
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from PIL import Image
-from comparator import compare, compare_batch, CompareResult
+from comparator import compare, CompareResult
 from phash import PHashResult
 from qwen_vl import VLResult
 
@@ -73,27 +73,6 @@ def test_compare_vl_fallback_on_error(mock_classify, mock_distance, mock_downloa
 
     assert result.method == "phash_fallback"
     assert result.is_same is False
-
-
-@patch("comparator.compare")
-def test_compare_batch_preserves_order(mock_compare):
-    """批量比对结果顺序与输入一致"""
-    def make_result(u1, u2, same):
-        return CompareResult(url1=u1, url2=u2, is_same=same, similarity_score=90,
-                             recommendation="test", reason="test", method="phash_same")
-    mock_compare.side_effect = [
-        make_result("u1", "u2", True),
-        make_result("u3", "u4", False),
-        make_result("u5", "u6", True),
-    ]
-
-    pairs = [("u1", "u2"), ("u3", "u4"), ("u5", "u6")]
-    results = compare_batch(pairs)
-
-    assert len(results) == 3
-    assert results[0].url1 == "u1" and results[0].is_same is True
-    assert results[1].url1 == "u3" and results[1].is_same is False
-    assert results[2].url1 == "u5" and results[2].is_same is True
 
 
 @patch("comparator.download_image")

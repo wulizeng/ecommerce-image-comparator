@@ -1,9 +1,7 @@
 from dataclasses import dataclass, field
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from downloader import download_image, DownloadError
 from phash import compute_hamming_distance, classify_by_distance
 from qwen_vl import call_qwen_vl, VLError
-from config import BATCH_CONCURRENCY
 
 
 @dataclass
@@ -101,32 +99,3 @@ def compare(url1: str, url2: str, api_key: str = "") -> CompareResult:
             method="phash_fallback",
             steps=steps,
         )
-
-
-def compare_batch(pairs: list[tuple[str, str]]) -> list[CompareResult]:
-    """
-    批量并发比对。使用 ThreadPoolExecutor 控制并发数，避免批量处理超时。
-    pairs: [(url1, url2), ...]
-    返回���序与输入保持一致。
-    """
-    results: list[CompareResult | None] = [None] * len(pairs)
-
-    with ThreadPoolExecutor(max_workers=BATCH_CONCURRENCY) as executor:
-        future_to_index = {
-            executor.submit(compare, url1, url2): i
-            for i, (url1, url2) in enumerate(pairs)
-        }
-        for future in as_completed(future_to_index):
-            idx = future_to_index[future]
-            try:
-                results[idx] = future.result()
-            except Exception as e:
-                url1, url2 = pairs[idx]
-                results[idx] = CompareResult(
-                    url1=url1, url2=url2,
-                    is_same=False, similarity_score=0,
-                    recommendation="处理异常，无法判断",
-                    reason=str(e), method="error", error=str(e)
-                )
-
-    return results
