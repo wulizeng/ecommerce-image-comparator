@@ -3,7 +3,7 @@ builder = "nixpacks"
 installCommand = "pip install -r image_comparator/requirements.txt"
 
 [deploy]
-startCommand = "streamlit run image_comparator/app.py --server.port=$PORT --server.address=0.0.0.0"
+startCommand = "PYTHONUTF8=1 LANG=C.UTF-8 streamlit run image_comparator/app.py --server.port=$PORT --server.address=0.0.0.0"
 healthcheckPath = "/"
 healthcheckTimeout = 30
 restartPolicyType = "on_failure"
